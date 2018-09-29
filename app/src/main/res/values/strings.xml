@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">StringChecker</string>
+    <string name="test1">StringChecker %1$d</string>
+</resources>

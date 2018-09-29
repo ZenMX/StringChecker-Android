@@ -1,0 +1,24 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'String checker for android',
+                'Implementation-Version': '1.0',
+                'Main-Class': 'com.mx.checker.StringChecker'
+    }
+    baseName = project.name + '-all'
+    from {
+        configurations.compile.collect {
+            System.out.println('-----------------------' + it)
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    with jar
+}

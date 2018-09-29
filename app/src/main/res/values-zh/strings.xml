@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">字符串校验</string>
+    <string name="test1">StringChecker %1$s</string>
+</resources>
