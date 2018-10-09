@@ -26,10 +26,12 @@ public class StringChecker {
     public static class Item {
         public final String key;
         public final String value;
+        public final String file;
 
-        public Item(String key, String value) {
+        public Item(String key, String value, String file) {
             this.key = key;
             this.value = value;
+            this.file = file;
         }
     }
 
@@ -41,8 +43,8 @@ public class StringChecker {
         System.out.println("string checker ----------");
         try {
 
-        StringChecker stringChecker = new StringChecker(args[0]);
-//            StringChecker stringChecker = new StringChecker("/Users/lin/Documents/android/mx/StringChecker/app");
+//        StringChecker stringChecker = new StringChecker(args[0]);
+            StringChecker stringChecker = new StringChecker("/Users/bo.liao/StudioProjects/StringChecker-Android/app");
             stringChecker.check();
         }catch (Exception e) {
             System.out.println("string checker -------error");
@@ -67,27 +69,43 @@ public class StringChecker {
 
         collectEnglishStrings(file);
 
-        List<File> files = findFiles(file);
-        for (File singleFile : files) {
-            checkFile(singleFile.getAbsolutePath());
+//        List<File> files = findFiles(file);
+//        for (File singleFile : files) {
+//            checkFile(singleFile.getAbsolutePath());
+//        }
+        List<File> languages = findLanguages(file);
+        for(File singleLanguage:languages){
+            checkLanguage(singleLanguage);
         }
     }
 
-    private List<File> findFiles(File dir) {
+    private List<File> findLanguages(File dir){
         File file = new File(dir, "/src/main/res");
         File[] files = file.listFiles();
         ArrayList<File> list = new ArrayList<>();
         for (File file1 : files) {
             if (file1.getName().indexOf("values-") != -1) {
-
-                File[] files1 = file1.listFiles();
-                for (File file2 : files1) {
-                    list.add(file2);
-                }
+                list.add(file1);
             }
         }
         return list;
     }
+
+//    private List<File> findFiles(File dir) {
+//        File file = new File(dir, "/src/main/res");
+//        File[] files = file.listFiles();
+//        ArrayList<File> list = new ArrayList<>();
+//        for (File file1 : files) {
+//            if (file1.getName().indexOf("values-") != -1) {
+//
+//                File[] files1 = file1.listFiles();
+//                for (File file2 : files1) {
+//                    list.add(file2);
+//                }
+//            }
+//        }
+//        return list;
+//    }
 
     private void init() {
         englishStrings = new HashMap<>();
@@ -110,18 +128,54 @@ public class StringChecker {
         }
     }
 
-    private void checkFile(String filename) {
-        System.out.println("check file ---->" + filename);
-        Set<Item> items = parseFile(filename);
+    private void checkLanguage(File dir){
+        System.out.println("\ncheck language ---->" + dir.getAbsolutePath().substring(dir.getAbsolutePath().lastIndexOf("/")+1));
+        File[] files = dir.listFiles();
+        Set<Item> items = new HashSet<>();
+        for(File f:files)
+            items.addAll(parseFile(f.getAbsolutePath()));
 
         for (Item item : items) {
             for (Rule rule : rules) {
                 if (!rule.isLegal(item.key, item.value)) {
-                    System.out.println(rule.desc() + " : " + item.key + " : " + item.value);
+                    System.out.println("\terror:" + rule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value);
+                    break;
                 }
             }
         }
+
+        LocalizedRule localizedRule = new LocalizedRule(items);
+        for (Item item : englishStrings.values()) {
+            if(!localizedRule.isLegal(item.key, null)){
+                System.out.println("\terror:" + localizedRule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value);
+                break;
+            }
+
+        }
     }
+
+//    private void checkFile(String filename) {
+//        System.out.println("check file ---->" + filename);
+//        Set<Item> items = parseFile(filename);
+//
+//        for (Item item : items) {
+//            for (Rule rule : rules) {
+//                if (!rule.isLegal(item.key, item.value)) {
+//                    System.out.println("error:" + rule.desc() + " at string key =  " + item.key + ", value = " + item.value);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        LocalizedRule localizedRule = new LocalizedRule(items);
+//        for (String key : englishStrings.keySet()) {
+//            if(!localizedRule.isLegal(key, null)){
+//                System.out.println("error:" + localizedRule.desc() + " at string key =  " + key);
+//                break;
+//            }
+//
+//        }
+//    }
 
     private Set<Item> parseFile(String filename) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -141,7 +195,7 @@ public class StringChecker {
                 String nodeValue = firstChild.getNodeValue();
                 Node name = attributes.getNamedItem("name");
                 String nodeName = name.getNodeValue();
-                hashSet.add(new Item(nodeName, nodeValue));
+                hashSet.add(new Item(nodeName, nodeValue, filename.substring(filename.lastIndexOf('/')+1)));
             }
 
             return hashSet;
@@ -174,6 +228,28 @@ public class StringChecker {
         @Override
         public String desc() {
             return "string should presents in english.";
+        }
+    }
+
+    private static class LocalizedRule implements Rule {
+        public final Set<Item> localizedStrings;
+
+        public LocalizedRule(Set<Item> localizedStrings){
+            this.localizedStrings = localizedStrings;
+        }
+
+        @Override
+        public boolean isLegal(String key, String value) {
+            for(Item item:localizedStrings){
+                if(item.key.equals(key))
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String desc() {
+            return "String is not localized.";
         }
     }
 }
