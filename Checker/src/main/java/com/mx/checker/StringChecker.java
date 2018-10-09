@@ -39,6 +39,7 @@ public class StringChecker {
      * dir
      * @param args
      */
+
     public static void main(String[] args) {
         System.out.println("string checker ----------");
         try {
