@@ -44,8 +44,8 @@ public class StringChecker {
         System.out.println("string checker ----------");
         try {
 
-//        StringChecker stringChecker = new StringChecker(args[0]);
-            StringChecker stringChecker = new StringChecker("/Users/bo.liao/StudioProjects/StringChecker-Android/app");
+        StringChecker stringChecker = new StringChecker(args[0]);
+//            StringChecker stringChecker = new StringChecker("/Users/lin/Documents/android/mx/StringChecker/app");
             stringChecker.check();
         }catch (Exception e) {
             System.out.println("string checker -------error");
@@ -130,7 +130,7 @@ public class StringChecker {
     }
 
     private void checkLanguage(File dir){
-        System.out.println("\ncheck language ---->" + dir.getAbsolutePath().substring(dir.getAbsolutePath().lastIndexOf("/")+1));
+        System.out.println("\ncheck language ---->" + dir.getAbsolutePath());
         File[] files = dir.listFiles();
         Set<Item> items = new HashSet<>();
         for(File f:files)
@@ -139,20 +139,21 @@ public class StringChecker {
         for (Item item : items) {
             for (Rule rule : rules) {
                 if (!rule.isLegal(item.key, item.value)) {
-                    System.out.println("\terror:" + rule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value);
-                    break;
+                    Item item1 = englishStrings.get(item.key);
+                    System.out.println("\terror:" + rule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value + " original: " + (item1 != null ? item1.value : ""));
+//                    break;
                 }
             }
         }
 
-        LocalizedRule localizedRule = new LocalizedRule(items);
-        for (Item item : englishStrings.values()) {
-            if(!localizedRule.isLegal(item.key, null)){
-                System.out.println("\terror:" + localizedRule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value);
-                break;
-            }
-
-        }
+//        LocalizedRule localizedRule = new LocalizedRule(items);
+//        for (Item item : englishStrings.values()) {
+//            if(!localizedRule.isLegal(item.key, null)){
+//                System.out.println("\terror:" + localizedRule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value);
+//                break;
+//            }
+//
+//        }
     }
 
 //    private void checkFile(String filename) {
