@@ -140,7 +140,7 @@ public class StringChecker {
             for (Rule rule : rules) {
                 if (!rule.isLegal(item.key, item.value)) {
                     Item item1 = englishStrings.get(item.key);
-                    System.out.println("\terror:" + rule.desc() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value + " original: " + (item1 != null ? item1.value : ""));
+                    System.err.println("\terror:" + rule.desc() + "dir: " + dir.getAbsolutePath() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value + " original: " + (item1 != null ? item1.value : ""));
 //                    break;
                 }
             }
