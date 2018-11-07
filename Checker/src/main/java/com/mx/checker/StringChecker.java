@@ -1,6 +1,7 @@
 package com.mx.checker;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,8 +29,8 @@ public class StringChecker {
         public final String value;
         public final String file;
 
-        public Item(String key, String value, String file) {
-            this.key = key;
+        public Item(StringBuffer key, String value, String file) {
+            this.key = key.toString();
             this.value = value;
             this.file = file;
         }
@@ -44,8 +45,9 @@ public class StringChecker {
         System.out.println("string checker ----------");
         try {
 
-        StringChecker stringChecker = new StringChecker(args[0]);
+//        StringChecker stringChecker = new StringChecker(args[0]);
 //            StringChecker stringChecker = new StringChecker("/Users/lin/Documents/android/mx/StringChecker/app");
+            StringChecker stringChecker = new StringChecker("/Users/bo.liao/StudioProjects/StringChecker-Android/app");
             stringChecker.check();
         }catch (Exception e) {
             System.out.println("string checker -------error");
@@ -114,7 +116,8 @@ public class StringChecker {
 
         //add rules
         rules.add(new ExistRule(englishStrings));
-        rules.add(new ParameterRule(englishStrings));
+        rules.add(new ParameterSyncRule(englishStrings));
+        rules.add(new ParameterDuplicateRule(englishStrings));
     }
 
     private void collectEnglishStrings(File dir) {
@@ -124,7 +127,7 @@ public class StringChecker {
         for (File file1 : files) {
             Set<Item> items = parseFile(file1.getAbsolutePath());
             for (Item item : items) {
-                 englishStrings.put(item.key, item);
+                englishStrings.put(item.key, item);
             }
         }
     }
@@ -140,12 +143,12 @@ public class StringChecker {
             for (Rule rule : rules) {
                 if (!rule.isLegal(item.key, item.value)) {
                     Item item1 = englishStrings.get(item.key);
-                    System.err.println("\terror:" + rule.desc() + "dir: " + dir.getAbsolutePath() + " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value + " original: " + (item1 != null ? item1.value : ""));
-//                    break;
+                    System.out.println("\terror:" + rule.desc() + /*"dir: " + dir.getAbsolutePath() +*/ " at string file =  " + item.file + ", key = " + item.key + ", value = " + item.value + " original: " + (item1 != null ? item1.value : ""));
+                    break;
                 }
             }
         }
-
+        System.out.println("\ncheck language ---->end" + dir.getAbsolutePath() + "\n");
 //        LocalizedRule localizedRule = new LocalizedRule(items);
 //        for (Item item : englishStrings.values()) {
 //            if(!localizedRule.isLegal(item.key, null)){
@@ -196,9 +199,22 @@ public class StringChecker {
 
                 String nodeValue = firstChild.getNodeValue();
                 Node name = attributes.getNamedItem("name");
-                String nodeName = name.getNodeValue();
+                StringBuffer nodeName = new StringBuffer(name.getNodeValue());
                 hashSet.add(new Item(nodeName, nodeValue, filename.substring(filename.lastIndexOf('/')+1)));
             }
+
+            NodeList plurals = parse.getElementsByTagName("plurals");
+            for(int i= 0; i < plurals.getLength(); i++) {
+                Element pluralElement = (Element)plurals.item(i);
+                NodeList items = pluralElement.getElementsByTagName("item");
+                for(int j= 0; j < items.getLength(); j++) {
+                    StringBuffer nodeName = new StringBuffer(pluralElement.getAttribute("name"));
+                    Element itemElement = (Element) items.item(j);
+                    nodeName.append(" -> ").append(itemElement.getAttribute("quantity"));
+                    hashSet.add(new Item(nodeName, itemElement.getTextContent(), filename.substring(filename.lastIndexOf('/')+1)));
+                }
+            }
+
 
             return hashSet;
 

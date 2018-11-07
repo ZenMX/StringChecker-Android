@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">字符串校验</string>
-    <string name="test1">StringChecker %1$s</string>
+    <string name="test1">StringChecker %1$d</string>
+    <string name="test2">StringChecker %1$d %2$s %3$d %4$s</string>
+    <string name="test3">StringChecker %1$d %1$s</string>
+    <plurals name="count_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
 </resources>

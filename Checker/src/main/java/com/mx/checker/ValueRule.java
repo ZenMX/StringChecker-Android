@@ -11,8 +11,10 @@ public abstract class ValueRule extends StringChecker.BaseRule {
     @Override
     public boolean isLegal(String key, String value) {
         StringChecker.Item item = englishStrings.get(key);
-
-        return check(item.value, value);
+        if(item == null)
+            return true;
+        else
+            return check(item.value, value);
     }
 
     protected abstract boolean check(String english, String other);
